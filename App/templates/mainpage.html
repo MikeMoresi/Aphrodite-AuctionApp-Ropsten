@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+<!-- Top menu -->
+<div class="w3-top">
+  <div class="w3-white w3-xlarge" style="max-width:1200px;margin:auto">
+    <div class="w3-right w3-padding-16"><a href="{% url 'login' %}" onclick="w3_close()" class="w3-bar-item w3-button">LogIn</a></div>
+    <div class="w3-right w3-padding-16"><a href="{% url 'logout' %}" onclick="w3_close()" class="w3-bar-item w3-button">LogOut</a></div>
+    <div class="w3-right w3-padding-16"><a href="sell" onclick="w3_close()" class="w3-bar-item w3-button">Sell Items</a></div>
+    <div class="w3-left w3-padding-16">Aphrodite</div>
+    <div>
+        {% if messages %}
+            <ul class="messages">
+            {% for message in messages %}
+                <p>{% if message.tags %}{% endif %}{{ message }}</p>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+  </div>
+</div>
+<hr id="about">
+
+  <!-- About Section -->
+  <div class="w3-container w3-padding-32 w3-center">
+    <div class="w3-padding-32">
+      <h6><i>Follow the trend</i></h6>
+      <p>Aphrodite is an auctions marketplace. Get quick and easy access to collectibles and explore, buy and sell items from different artists.</p>
+    </div>
+  </div>
+<hr>
+
+<!-- !PAGE CONTENT! -->
+<div class="w3-main w3-content w3-padding" style="max-width:1200px;margin-top:100px">
+
+  <!-- First Photo Grid-->
+
+      {% for obj in objects %}
+            <div class="w3-row-padding w3-padding-16 w3-quarter w3-margin-bottom">
+                    <h3>{{ obj.objectsName }}</h3>
+                    <img src="{{ obj.image.url}}" width="200" height="200">
+                    <p>End Date: {{ obj.endDate }}</p>
+                    {% if obj.lastBidder == "" %}
+                    <p>Starting Price: {{ obj.startingPrice }} $</p>
+                    {%else%}
+                    <p>{{obj.lastBid}} $ from {{obj.lastBidder}}</p>
+                    {% endif %}
+                    <p>"{{obj.descriptiveText}}"</p>
+                    <p>Seller: {{obj.seller}}</p>
+                    <button type="submit" name="makeAnOffer"><a href="{{obj.get_url}}" style="text-decoration:none">Make an offer!</a></button>
+            </div>
+
+      {% endfor %}
+</div>
+
+
+<!-- Footer -->
+  <footer class="w3-row-padding w3-padding-32 w3-margin-top">
+    <div class="w3-third w3-margin-top">
+      <h3>FOOTER</h3>
+      <p>Praesent tincidunt sed tellus ut rutrum. Sed vitae justo condimentum, porta lectus vitae, ultricies congue gravida diam non fringilla.</p>
+      <p>Powered by MikeMoresi <a href="https://github.com/MikeMoresi" target="_blank">GitHub</a></p>
+    </div>
+  </footer>
+{% endblock %}

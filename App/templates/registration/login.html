@@ -1,0 +1,18 @@
+<!-- templates/registration/login.html -->
+{% extends 'base.html' %}
+
+Login
+
+{% block content %}
+<div class="w3-margin-left">
+<h2>Log In</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Log In</button>
+  <p>Haven't you an account?</p>
+  <button type="submit"><a href="/signup/" style="text-decoration:none">signup</a> </button>
+
+</form>
+</div>
+{% endblock %}
