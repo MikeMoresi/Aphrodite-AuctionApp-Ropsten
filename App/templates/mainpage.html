@@ -7,7 +7,7 @@
     <div class="w3-right w3-padding-16"><a href="{% url 'login' %}" onclick="w3_close()" class="w3-bar-item w3-button">LogIn</a></div>
     <div class="w3-right w3-padding-16"><a href="{% url 'logout' %}" onclick="w3_close()" class="w3-bar-item w3-button">LogOut</a></div>
     <div class="w3-right w3-padding-16"><a href="sell" onclick="w3_close()" class="w3-bar-item w3-button">Sell Items</a></div>
-    <div class="w3-left w3-padding-16">Aphrodite</div>
+    <div class="w3-left w3-padding-16"><a href="" class="w3-bar-item w3-button">Aphrodite</a></div>
     <div>
         {% if messages %}
             <ul class="messages">
@@ -31,20 +31,22 @@
 <hr>
 
 <!-- !PAGE CONTENT! -->
-<div class="w3-main w3-content w3-padding" style="max-width:1200px;margin-top:100px">
 
+<div class="w3-main w3-content w3-padding" style="max-width:1200px;margin-top:100px">
+<div>
+    <form method="get" class="w3-container w3-padding-32 w3-center">
+        {{myFilter.form}}
+        <p><button class="btn btn-primaty" type="submit">Search</button></p>
+    </form>
+</div>
   <!-- First Photo Grid-->
 
-      {% for obj in objects %}
+    {% for obj in objects %}
             <div class="w3-row-padding w3-padding-16 w3-quarter w3-margin-bottom">
-                    <h3>{{ obj.objectsName }}</h3>
+                    <h3>{{ obj.title }}</h3>
                     <img src="{{ obj.image.url}}" width="200" height="200">
                     <p>End Date: {{ obj.endDate }}</p>
-                    {% if obj.lastBidder == "" %}
-                    <p>Starting Price: {{ obj.startingPrice }} $</p>
-                    {%else%}
-                    <p>{{obj.lastBid}} $ from {{obj.lastBidder}}</p>
-                    {% endif %}
+                    <p>Price: {{ obj.price }} $</p>
                     <p>"{{obj.descriptiveText}}"</p>
                     <p>Seller: {{obj.seller}}</p>
                     <button type="submit" name="makeAnOffer"><a href="{{obj.get_url}}" style="text-decoration:none">Make an offer!</a></button>

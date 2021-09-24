@@ -30,10 +30,13 @@
         {{ form.as_p }}
         <button type="submit" class="btn btn-primary">Save</button>
     </form>
+    <button type="submit"><a href="{% url 'mainpage' %}" style="text-decoration:none">Homepage</a></button>
+
 {% else %}
     <div class="w3-margin-left">
     <h2>OPS! You are not logged in</h2>
     <button type="submit"><a href="{% url 'login' %}" style="text-decoration:none">Login</a></button>
+
     </div>
 </div>
 {% endif %}

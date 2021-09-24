@@ -5,22 +5,21 @@ import hashlib,json
 from .utils import sendTransaction
 # Create your models here.
 
-class Auctions(models.Model):
+
+class Auction(models.Model):
     #auction status
     active = models.BooleanField(default=True)
     #object
-    seller = models.ForeignKey(User, on_delete=models.CASCADE)
-    objectsName = models.CharField(max_length=20)
-    startingPrice = models.PositiveIntegerField(null=True)
+    seller = models.ForeignKey(User, on_delete=models.CASCADE,related_name='seller')
+    title = models.CharField(max_length=20)
+    price = models.PositiveIntegerField(null=True)
     image = models.ImageField(upload_to='media', null=True)
     descriptiveText = models.TextField()
     publicDate = models.DateTimeField(auto_now_add=True)
     endDate = models.DateTimeField(auto_now_add=False)
     #bid
-    lastBidder = models.CharField(max_length=20, default='')
+    lastBidder = models.ForeignKey(User,on_delete=models.CASCADE,related_name='lastBid',null=True)
     bid = models.IntegerField(null=True)
-    lastBid = models.IntegerField(null=True, default=0)
-    winner = models.CharField(max_length=20,null=True)
     #Ropsten
     hash = models.CharField(max_length=32)
     txId = models.CharField(max_length=66)
@@ -30,11 +29,10 @@ class Auctions(models.Model):
 
     def auctionWinner(self):
         self.active = False
-        self.winner = self.lastBidder
         actionsData = {
-            'winner': self.winner,
-            'paid': self.lastBidder,
-            'object': self.objectsName,
+            'winner': str(self.lastBidder),
+            'paid': self.price,
+            'object': self.title,
         }
         jsonAcutionsData = json.dumps(actionsData)
         self.save()

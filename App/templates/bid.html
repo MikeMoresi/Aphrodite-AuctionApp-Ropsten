@@ -11,12 +11,28 @@
         </ul>
     {% endif %}
 
+<div class="w3-row-padding w3-padding-16 w3-quarter w3-margin-bottom">
     <form method="POST" >
+
+                    <h3>{{ auction.title }}</h3>
+                    <img src="{{ auction.image.url}}" width="200" height="200">
+                    <p>End Date: {{ auction.endDate }}</p>
+                    {% if auction.lastBidder == None %}
+                    <p>Starting Price: {{ auction.startingPrice }} $</p>
+                    {%else%}
+                    <p>{{auction.lastBid}} $ from {{auction.lastBidder}}</p>
+                    {% endif %}
+                    <p>"{{auction.descriptiveText}}"</p>
+                    <p>Seller: {{auction.seller}}</p>
+
         {% csrf_token %}
         {{ form.as_p }}
+
           <button type="submit" class="btn btn-primary">Save</button>
 
     </form>
+    <button class="w3-quarter w3-margin-bottom" type="submit"><a href="{% url 'mainpage' %}" style="text-decoration:none">Homepage</a></button>
+</div>
 {% else %}
     <h2>OPS! You are not logged in</h2>
     <button type="submit"><a href="{% url 'login' %}" style="text-decoration:none">Login</a></button>

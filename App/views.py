@@ -3,9 +3,11 @@ from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy
 from django.views import generic
 from .forms import SellForms,BidForms
-from .models import Auctions
+from .models import Auction
 from django.contrib import messages
+from .filters import AuctionFilter
 import redis, datetime
+
 
 
 #redis
@@ -17,7 +19,7 @@ class SignUpView(generic.CreateView):
     template_name = 'registration/signup.html'
 
 def mainpage(request):
-    objects = Auctions.objects.filter(active=True).order_by('endDate')
+    objects = Auction.objects.filter(active=True).order_by('endDate')
     for obj in objects:
         if obj.endDate.replace(tzinfo=None) <= datetime.datetime.now():
             if obj.lastBidder is None:
@@ -28,7 +30,11 @@ def mainpage(request):
                 obj.auctionWinner()
                 #send to ropsten
                 obj.writeOnChain()
-    return render(request,'mainpage.html',{'objects':objects,})
+
+    myFilter = AuctionFilter(request.GET, queryset=objects)
+    objects = myFilter.qs
+
+    return render(request,'mainpage.html',{'objects':objects,'myFilter':myFilter})
 
 def sellView(request):
     if request.method == "POST":
@@ -48,7 +54,7 @@ def sellView(request):
 
 
 def bidView(request,pk):
-    auction = get_object_or_404(Auctions,pk=pk)
+    auction = get_object_or_404(Auction,pk=pk)
     user = request.user
     form = BidForms(request.POST)
     if request.method == 'POST':
@@ -60,10 +66,10 @@ def bidView(request,pk):
                 if float(bid) <= 0:
                     messages.error(request,'Invalid Offer')
                     return redirect(reverse('bid',kwargs={'pk':auction.pk}))
-                if float(bid) <= auction.lastBid or float(bid)<=auction.startingPrice:
+                if float(bid) <= auction.price:
                     messages.error(request, 'Your offer has to be greater than the current one!')
                     return redirect(reverse('bid', kwargs={'pk': auction.pk}))
-                if str(user) == auction.lastBidder:
+                if user == auction.lastBidder:
                     messages.error(request, 'You are already the higthest bidder!')
                     return redirect(reverse('bid', kwargs={'pk': auction.pk}))
                 if user == auction.seller:
@@ -72,12 +78,12 @@ def bidView(request,pk):
 
                 #save
                 messages.success(request,'Well done, your offer has been saved!')
-                auction.lastBidder = str(user)
-                auction.lastBid = bid
-                client.lpush('lBid', auction.lastBid, auction.lastBidder, str(pk))
+                auction.lastBidder = user
+                auction.price = bid
+                client.lpush('lBid', auction.price, str(auction.lastBidder), str(pk))
                 auction.save()
                 return redirect('mainpage')
         else:
             form = BidForms()
-    return render(request,'bid.html',{'form':form})
+    return render(request,'bid.html',{'form':form,'auction':auction})
 
