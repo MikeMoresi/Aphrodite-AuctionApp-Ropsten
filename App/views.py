@@ -83,7 +83,11 @@ def bidView(request,pk):
                 client.lpush('lBid', auction.price, str(auction.lastBidder), str(pk))
                 auction.save()
                 return redirect('mainpage')
+
         else:
             form = BidForms()
     return render(request,'bid.html',{'form':form,'auction':auction})
+
+
+
 

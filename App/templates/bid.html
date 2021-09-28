@@ -18,9 +18,9 @@
                     <img src="{{ auction.image.url}}" width="200" height="200">
                     <p>End Date: {{ auction.endDate }}</p>
                     {% if auction.lastBidder == None %}
-                    <p>Starting Price: {{ auction.startingPrice }} $</p>
+                    <p>Starting Price: {{ auction.price }} $</p>
                     {%else%}
-                    <p>{{auction.lastBid}} $ from {{auction.lastBidder}}</p>
+                    <p>{{auction.price}} $ from {{auction.lastBidder}}</p>
                     {% endif %}
                     <p>"{{auction.descriptiveText}}"</p>
                     <p>Seller: {{auction.seller}}</p>

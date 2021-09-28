@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
-import hashlib,json
+import hashlib,json,redis,time
 from .utils import sendTransaction
 # Create your models here.
 
@@ -43,6 +43,18 @@ class Auction(models.Model):
         self.hash = hashlib.sha256(self.auctionWinner().encode('utf-8')).hexdigest()
         self.txId = sendTransaction(self.hash)
         self.save()
+
+    def writeRedisOnChain(self):
+        while (1):
+            client = redis.StrictRedis(host='127.0.0.1', port=6379, db=0, password=None, decode_responses=True)
+            bidOnRedis = str(client.lrange('lBid', 0, -1))
+            bidOnRedisHash = hashlib.sha256(bidOnRedis.encode('utf-8')).hexdigest()
+            a = sendTransaction(bidOnRedisHash)
+            print(a)
+            hours = 24
+            minutes = 5
+            seconds = 60 * minutes
+            time.sleep(seconds)
 
 
 
