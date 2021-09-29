@@ -28,6 +28,7 @@
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
+        <p>If you insert your Ethereum address you will sell your item in aUSD</p>
         <button type="submit" class="btn btn-primary">Save</button>
     </form>
     <button type="submit"><a href="{% url 'mainpage' %}" style="text-decoration:none">Homepage</a></button>

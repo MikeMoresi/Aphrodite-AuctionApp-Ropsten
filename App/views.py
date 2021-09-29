@@ -2,16 +2,299 @@ from django.shortcuts import render,redirect, get_object_or_404,reverse
 from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy
 from django.views import generic
-from .forms import SellForms,BidForms
+from .forms import SellForms,BidForms,TokenBidForms
 from .models import Auction
 from django.contrib import messages
 from .filters import AuctionFilter
-import redis, datetime
-
-
+import redis, datetime, web3
+from web3 import Web3
 
 #redis
 client = redis.StrictRedis(host='127.0.0.1', port=6379, db=0, password=None, decode_responses=True)
+#connection to Aphrodite smart contract
+# ERC-20 token mined is aUSD, suppose 1 USD = 1 aUSD
+w3 = Web3(web3.HTTPProvider('https://ropsten.infura.io/v3/534a6ba32faa49eab8f59a336a9fe7e3'))
+contractAddress = '0xeD47A3870DF0a2cE32947B1482bB6BCce25419b1'
+abi = [
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": False,
+		"inputs": [
+			{
+				"indexed": True,
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"indexed": True,
+				"internalType": "address",
+				"name": "spender",
+				"type": "address"
+			},
+			{
+				"indexed": False,
+				"internalType": "uint256",
+				"name": "value",
+				"type": "uint256"
+			}
+		],
+		"name": "Approval",
+		"type": "event"
+	},
+	{
+		"anonymous": False,
+		"inputs": [
+			{
+				"indexed": True,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": True,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"indexed": False,
+				"internalType": "uint256",
+				"name": "value",
+				"type": "uint256"
+			}
+		],
+		"name": "Transfer",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "spender",
+				"type": "address"
+			}
+		],
+		"name": "allowance",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "spender",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "approve",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "balanceOf",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "decimals",
+		"outputs": [
+			{
+				"internalType": "uint8",
+				"name": "",
+				"type": "uint8"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "spender",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "subtractedValue",
+				"type": "uint256"
+			}
+		],
+		"name": "decreaseAllowance",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "spender",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "addedValue",
+				"type": "uint256"
+			}
+		],
+		"name": "increaseAllowance",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "name",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "symbol",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "totalSupply",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "recipient",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "transfer",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "recipient",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "transferFrom",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+]
+aphroditeContract = w3.eth.contract(address=contractAddress, abi=abi)
+contractOwner = '0x0A21EF3B600f508C6A9d1Acd11A0F3fC853475b1'
+
 
 class SignUpView(generic.CreateView):
     form_class = UserCreationForm
@@ -30,6 +313,12 @@ def mainpage(request):
                 obj.auctionWinner()
                 #send to ropsten
                 obj.writeOnChain()
+                #if seller gave etheruem address
+                tx_hash = aphroditeContract.functions.transfer(obj.sellerAddress, int(obj.price)).transact({'from': contractOwner})
+                tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+                rich_logs = aphroditeContract.events.Transfer().processReceipt(tx_receipt)
+                event = rich_logs[0]['args']
+                client.lpush('lEvent', str(event))
 
     myFilter = AuctionFilter(request.GET, queryset=objects)
     objects = myFilter.qs
@@ -46,8 +335,16 @@ def sellView(request):
             if auction.endDate.replace(tzinfo=None) <= now:
                 messages.error(request, 'Today is ' + str(now.strftime("%m/%d/%Y - %H:%M:%S")) + '!')
                 return redirect(reverse('sell'))
-            auction.save()
-            return redirect('mainpage')
+            #control if the sellerAddress is correct
+            if auction.sellerAddress == None:
+                auction.save()
+                return redirect(reverse('mainpage'))
+            else:
+                if Web3.isAddress(auction.sellerAddress) != True:
+                    messages.error(request, 'Invalid address')
+                    return redirect(reverse('sell'))
+                auction.save()
+                return redirect('mainpage')
     else:
         form = SellForms()
     return render(request, 'sell.html', {'form': form})
@@ -88,6 +385,53 @@ def bidView(request,pk):
             form = BidForms()
     return render(request,'bid.html',{'form':form,'auction':auction})
 
+def tokenBidView(request,pk):
+    auction = get_object_or_404(Auction,pk=pk)
+    user = request.user
+    form = TokenBidForms(request.POST)
 
+    #ERC-20 token mined is aUSD, suppose 1 USD = 1 aUSD
+    if request.method == 'POST':
+        if form.is_valid():
+                form = form.save(commit=False)
+                bid = request.POST.get('bid')
+                bidderAddress = request.POST.get('bidderAddress')
+                #ERC20-control
+                if Web3.isAddress(bidderAddress) != True:
+                    messages.error(request,'Your address is not valid!')
+                    return redirect(reverse('tokenBid',kwargs={'pk':auction.pk}))
+                if aphroditeContract.functions.balanceOf(bidderAddress).call() < float(bid):
+                    messages.error(request,'your bid exceeds your balance')
+                    return redirect(reverse('tokenBid',kwargs={'pk':auction.pk}))
+                else:
+                    #control
+                    if float(bid) <= 0:
+                        messages.error(request,'Invalid Offer')
+                        return redirect(reverse('tokenBid',kwargs={'pk':auction.pk}))
+                    if float(bid) <= auction.price:
+                        messages.error(request, 'Your offer has to be greater than the current one!')
+                        return redirect(reverse('tokenBid', kwargs={'pk': auction.pk}))
+                    if user == auction.lastBidder:
+                        messages.error(request, 'You are already the higthest bidder!')
+                        return redirect(reverse('tokenBid', kwargs={'pk': auction.pk}))
+                    if user == auction.seller:
+                        messages.error(request, 'You can t bid on your own product!')
+                        return redirect(reverse('tokenBid', kwargs={'pk': auction.pk}))
 
+                    #send transaction from bidder to contractOwner
+                    tx_hash = aphroditeContract.functions.transfer(contractOwner,int(bid)).transact({'from':bidderAddress})
+                    tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+                    rich_logs = aphroditeContract.events.Transfer().processReceipt(tx_receipt)
+                    event = rich_logs[0]['args']
 
+                    #save
+                    messages.success(request,'Well done, your offer has been saved!')
+                    auction.lastBidder = user
+                    auction.price = bid
+                    client.lpush('lBid', auction.price, str(auction.lastBidder), str(pk),str(event))
+                    auction.save()
+                    return redirect('mainpage')
+
+        else:
+            form = TokenBidForms()
+    return render(request,'tokenBid.html',{'form':form,'auction':auction})

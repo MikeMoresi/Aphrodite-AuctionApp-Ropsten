@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
-import hashlib,json,redis,time
+import hashlib,json
 from .utils import sendTransaction
 # Create your models here.
 
@@ -11,6 +11,7 @@ class Auction(models.Model):
     active = models.BooleanField(default=True)
     #object
     seller = models.ForeignKey(User, on_delete=models.CASCADE,related_name='seller')
+    sellerAddress = models.CharField(max_length=256,blank=True,null=True)
     title = models.CharField(max_length=20)
     price = models.PositiveIntegerField(null=True)
     image = models.ImageField(upload_to='media', null=True)
@@ -18,6 +19,7 @@ class Auction(models.Model):
     publicDate = models.DateTimeField(auto_now_add=True)
     endDate = models.DateTimeField(auto_now_add=False)
     #bid
+    bidderAddress = models.CharField(max_length=256,null=True)
     lastBidder = models.ForeignKey(User,on_delete=models.CASCADE,related_name='lastBid',null=True)
     bid = models.IntegerField(null=True)
     #Ropsten
@@ -26,6 +28,9 @@ class Auction(models.Model):
 
     def get_url(self):
         return reverse('bid', kwargs={'pk': self.pk})
+
+    def token_get_url(self):
+        return reverse('tokenBid',kwargs={'pk': self.pk})
 
     def auctionWinner(self):
         self.active = False
@@ -43,18 +48,4 @@ class Auction(models.Model):
         self.hash = hashlib.sha256(self.auctionWinner().encode('utf-8')).hexdigest()
         self.txId = sendTransaction(self.hash)
         self.save()
-
-    def writeRedisOnChain(self):
-        while (1):
-            client = redis.StrictRedis(host='127.0.0.1', port=6379, db=0, password=None, decode_responses=True)
-            bidOnRedis = str(client.lrange('lBid', 0, -1))
-            bidOnRedisHash = hashlib.sha256(bidOnRedis.encode('utf-8')).hexdigest()
-            a = sendTransaction(bidOnRedisHash)
-            print(a)
-            hours = 24
-            minutes = 5
-            seconds = 60 * minutes
-            time.sleep(seconds)
-
-
 

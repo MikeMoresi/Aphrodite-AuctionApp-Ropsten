@@ -49,7 +49,11 @@
                     <p>Price: {{ obj.price }} $</p>
                     <p>"{{obj.descriptiveText}}"</p>
                     <p>Seller: {{obj.seller}}</p>
-                    <button type="submit" name="makeAnOffer"><a href="{{obj.get_url}}" style="text-decoration:none">Make an offer!</a></button>
+                    {% if obj.sellerAddress != None %}
+                        <button type="submit" name="makeAnOffer"><a href="{{obj.token_get_url}}" style="text-decoration:none">Make an offer in aUSD!</a></button>
+                    {%else%}
+                        <button type="submit" name="makeAnOffer"><a href="{{obj.get_url}}" style="text-decoration:none">Make an offer in USD!</a></button>
+                    {% endif %}
             </div>
 
       {% endfor %}

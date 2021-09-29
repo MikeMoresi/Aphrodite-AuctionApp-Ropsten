@@ -1,5 +1,4 @@
 from web3 import Web3
-import random
 
 def sendTransaction(message):
     w3 = Web3(Web3.HTTPProvider('https://ropsten.infura.io/v3/534a6ba32faa49eab8f59a336a9fe7e3'))
