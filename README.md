@@ -12,17 +12,17 @@ special ERC-20 token minted from [Aphrodite](https://github.com/MikeMoresi/Aucti
 (suppose 1 USD = 1 aUSD)
 
 <h2>:thinking: How To Use It</h2>
-The first thing that you need to do is sign up. <br> 
-After that, you can sell and bit items. If you are a seller, while you are uploading your item,<br>
-you can choose if insert your ethereum address or not.<br>
-If you do that you will sell your item in aUSD.<br>
-At the end of the auction, the seller will be paid and the losers will be refunded. 
+Firstly you sign up, and then you can sell and bit items. <br>
+If you want to sell an item, you can decide wheter to include<br>
+your ethereum address or not, and in case you decide to include it,<br>
+your item will be sold in aUSD.<br>
+Once the auction is terminated, the bidders who did not win will be <br>
+immediately refunded, while the seller will get paid.
 
 <h2>:desktop_computer:	Database </h2>
-On this project, I chose to use Django default database and Redis. <br>
+This project is based on Django default database and Redis. <br>
 All the offers and the aUSD transaction events will be saved on Redis. <br>
-Due to not pay too many fees on the ethereum blockchain<br>
-all the offers will be sent on chain every 24h 
+In order to not pay too many fees, all the Redis offers data will be sent on ethereum blockchain every 24h 
 
 <h2>🔧 Build With</h2>
  Django <br>
