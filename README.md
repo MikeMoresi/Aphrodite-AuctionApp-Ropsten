@@ -9,7 +9,7 @@ A client asked me to build an auction platform where everyone could sell and buy
 As you can image, this is an Auction platform.<br>
 On this simulation you can sell and buy items in USD and aUSD. This one is a<br>
 special ERC-20 token minted from [Aphrodite](https://github.com/MikeMoresi/Auctions-App/blob/main/App/Aphrodite.sol) smart contract<br>
-(suppose 1 USD = 1 aUSD)
+(let's assume 1 USD = 1 aUSD)
 
 <h2>:thinking: How To Use It</h2>
 Firstly you sign up, and then you can sell and bit items. <br>
