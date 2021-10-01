@@ -20,6 +20,7 @@ class Auction(models.Model):
     endDate = models.DateTimeField(auto_now_add=False)
     #bid
     bidderAddress = models.CharField(max_length=256,null=True)
+    lbidderAddress = models.JSONField(default=list)
     lastBidder = models.ForeignKey(User,on_delete=models.CASCADE,related_name='lastBid',null=True)
     bid = models.IntegerField(null=True)
     #Ropsten

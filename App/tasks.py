@@ -9,9 +9,9 @@ client = redis.StrictRedis(host='127.0.0.1', port=6379, db=0, password=None, dec
 def writeRedisBidDataOnChain():
         bidOnRedis = client.lrange('lBid',0,-1)
         bidOnRedisHash = hashlib.sha256(str(bidOnRedis).encode('utf-8')).hexdigest()
-        a = sendTransaction(bidOnRedisHash)
+        sendTransaction(bidOnRedisHash)
         hours = 24
         minutes = 60 * hours
         seconds = 60 * minutes
-        time.sleep(10)
+        time.sleep(seconds)
 
