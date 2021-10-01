@@ -22,6 +22,7 @@ immediately refunded, while the seller will get paid.
 <h2>:desktop_computer:	Database </h2>
 This project is based on Django default database and Redis. <br>
 All the offers and the aUSD transaction events will be saved on Redis. <br>
+The Redis offers data will be aploaded on ethereum blockchian every 24h. 
 
 <h2>🔧 Build With</h2>
  Django <br>
