@@ -12,7 +12,7 @@ from web3 import Web3
 # redis
 client = redis.StrictRedis(host='127.0.0.1', port=6379, db=0, password=None, decode_responses=True)
 # connection to Aphrodite smart contract
-# ERC-20 token mined is aUSD, suppose 1 USD = 1 aUSD
+# ERC-20 token mined is aUSD, assume 1 USD = 1 aUSD
 w3 = Web3(web3.HTTPProvider('https://ropsten.infura.io/v3/534a6ba32faa49eab8f59a336a9fe7e3'))
 contractAddress = '0xeD47A3870DF0a2cE32947B1482bB6BCce25419b1'
 abi = [
@@ -408,7 +408,6 @@ def tokenBidView(request, pk):
     user = request.user
     form = TokenBidForms(request.POST)
 
-    # ERC-20 token mined is aUSD, suppose 1 USD = 1 aUSD
     if request.method == 'POST':
         if form.is_valid():
             form = form.save(commit=False)
@@ -444,7 +443,8 @@ def tokenBidView(request, pk):
 
                 # save
                 messages.success(request, 'Well done, your offer has been saved!')
-                # we create a list of dict with bidder address and bid in order to use it in mainpage view and refund the losers
+                # create a list of dicts with bidder address and bid
+                # it will be useful in the mainpage view to refund losers
                 dictBidderAddress = {bidderAddress:bid}
                 auction.lbidderAddress.append(dictBidderAddress)
                 auction.lastBidder = user
