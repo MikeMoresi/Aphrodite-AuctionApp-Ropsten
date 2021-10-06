@@ -6,15 +6,15 @@ from .forms import SellForms, BidForms, TokenBidForms
 from .models import Auction
 from django.contrib import messages
 from .filters import AuctionFilter
-import redis, datetime, web3
+import redis, datetime
 from web3 import Web3
 
 # redis
 client = redis.StrictRedis(host='127.0.0.1', port=6379, db=0, password=None, decode_responses=True)
 # connection to Aphrodite smart contract
 # ERC-20 token mined is aUSD, assume 1 USD = 1 aUSD
-w3 = Web3(web3.HTTPProvider('https://ropsten.infura.io/v3/534a6ba32faa49eab8f59a336a9fe7e3'))
-contractAddress = '0xeD47A3870DF0a2cE32947B1482bB6BCce25419b1'
+w3 = Web3(Web3.HTTPProvider('http://127.0.0.1:8545'))
+contractAddress = '0x8039A86b0Ded398A4B76d0Aa28DA95a6B79AF32E'
 abi = [
     {
         "inputs": [],
@@ -293,7 +293,7 @@ abi = [
     }
 ]
 aphroditeContract = w3.eth.contract(address=contractAddress, abi=abi)
-contractOwner = '0x0A21EF3B600f508C6A9d1Acd11A0F3fC853475b1'
+contractOwner = '0x537a165C85B80c4A58305b8A39865ab1B6a7c43B'
 
 
 
@@ -456,4 +456,6 @@ def tokenBidView(request, pk):
         else:
             form = TokenBidForms()
     return render(request, 'tokenBid.html', {'form': form, 'auction': auction})
+
+
 
